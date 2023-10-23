@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>PDF Upload</title>
+</head>
+<body>
+
+    <h1>Upload a PDF File</h1>
+
+    <!-- HTML Form -->
+    <form id="upload-form" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <input type="file" id="pdf-file" accept="application/pdf">
+        <button type="submit">Upload</button>
+    </form>
+
+    <!-- Status Message -->
+    <div id="status"></div>
+
+    <!-- JavaScript Code -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const form = document.getElementById('upload-form');
+        
+            // Get CSRF token from the form
+            const csrftoken = document.getElementsByName('csrfmiddlewaretoken')[0].value;
+        
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+        
+                const formData = new FormData();
+                formData.append('pdf_file', document.getElementById('pdf-file').files[0]);
+                console.log(formData);
+        
+                fetch('/upload/', {  
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': csrftoken  
+                    },
+                    body: formData,
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        document.getElementById('status').textContent = 'Upload successful.';
+                        form.reset();
+                    } else {
+                        document.getElementById('status').textContent = 'Upload failed.';
+                    }
+                })
+                .catch(() => {
+                    document.getElementById('status').textContent = 'An error occurred.';
+                });
+            });
+        });
+        
+    </script>
+
+</body>
+</html>
